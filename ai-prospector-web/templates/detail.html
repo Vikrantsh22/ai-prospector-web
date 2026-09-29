@@ -1,0 +1,75 @@
+cat << 'EOF' > templates/detail.html
+{% extends "base.html" %}
+{% block content %}
+<a href="/" style="text-decoration:none; color:var(--text-sub); font-size:13px; font-weight:700;">← Back to Pipeline</a>
+<div class="card" style="margin-top:12px;">
+<h1 style="font-size:24px; font-weight:800;">{{ account.business_name }} ✨</h1>
+<p style="color:var(--text-sub); font-size:14px; margin-top:4px;">{{ account.industry }} • {{ account.city }}, {{ account.state }}</p>
+<p style="color:var(--blue); font-size:13px; font-weight:600; margin-top:4px;">{{ account.website }} 🌐</p>
+</div>
+<div class="card">
+<h2 style="font-size:16px; font-weight:800; margin-bottom:10px;">💡 AI Opportunity Analysis</h2>
+<div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+{% for need in account.needs %}
+{% set meta = ai_need_info.get(need) %}
+<span style="background:var(--lavender-light); color:var(--lavender); font-size:12px; font-weight:700; padding:6px 12px; border-radius:14px;">
+{{ meta.emoji if meta else '⚡' }} {{ meta.label if meta else need }}
+</span>
+{% endfor %}
+</div>
+<p style="background:var(--bg); border:1px solid var(--card-border); padding:12px; border-radius:14px; font-size:13px; color:var(--text-sub); line-height:1.5;">
+{{ account.ai_need_reasoning }}
+</p>
+</div>
+<div class="card">
+<h2 style="font-size:16px; font-weight:800; margin-bottom:12px;">💌 Outreach & Contacts</h2>
+{% for c in contacts %}
+<div style="background:var(--bg); border:1px solid var(--card-border); border-radius:16px; padding:16px; margin-bottom:12px;">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<div>
+<h3 style="font-size:15px; font-weight:800;">{{ c.full_name }} 🌸</h3>
+<p style="font-size:12px; color:var(--text-sub);">{{ c.job_title }} • {{ c.email }} • {{ c.phone }}</p>
+</div>
+{% if c.email_opt_out == 1 %}
+<span style="background:var(--coral-light); color:var(--coral); font-size:11px; font-weight:800; padding:4px 8px; border-radius:10px;">Resting 💤</span>
+{% endif %}
+</div>
+{% if c.email_opt_out == 0 %}
+<div style="display:flex; gap:8px; margin-top:12px;">
+<form method="POST" action="/contact/{{ c.contact_id }}/action" style="flex:1;">
+<input type="hidden" name="account_id" value="{{ account.account_id }}">
+<input type="hidden" name="action_type" value="call_outbound">
+<button type="submit" onclick="window.open('tel:{{ c.phone }}')" style="width:100%; border:none; background:var(--blue); color:#FFF; font-weight:800; padding:8px; border-radius:12px; cursor:pointer;">
+📞 Call
+</button>
+</form>
+<form method="POST" action="/contact/{{ c.contact_id }}/action" style="flex:1;">
+<input type="hidden" name="account_id" value="{{ account.account_id }}">
+<input type="hidden" name="action_type" value="email_sent">
+<input type="hidden" name="email" value="{{ c.email }}">
+<button type="submit" onclick="window.open('mailto:{{ c.email }}?subject=Idea for {{ account.business_name }}')" style="width:100%; border:none; background:var(--pink); color:#FFF; font-weight:800; padding:8px; border-radius:12px; cursor:pointer;">
+💌 Email
+</button>
+</form>
+</div>
+<form method="POST" action="/contact/{{ c.contact_id }}/opt-out" style="text-align:center; margin-top:8px;">
+<input type="hidden" name="account_id" value="{{ account.account_id }}">
+<button type="submit" style="background:none; border:none; color:var(--text-muted); font-size:11px; font-weight:700; cursor:pointer;">
+Quiet Mode (Opt Out) 🛑
+</button>
+</form>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+<div class="card">
+<h2 style="font-size:16px; font-weight:800; margin-bottom:12px;">🌱 Lead Stage</h2>
+<form method="POST" action="/account/{{ account.account_id }}/status" style="display:flex; gap:8px; flex-wrap:wrap;">
+{% for s in ['contacted', 'engaged', 'meeting_booked', 'closed_won'] %}
+<button type="submit" name="status" value="{{ s }}" style="border:1px solid var(--card-border); background:{{ 'var(--green)' if account.account_status == s else 'var(--bg)' }}; color:{{ '#FFF' if account.account_status == s else 'var(--text-sub)' }}; font-weight:700; font-size:12px; padding:8px 16px; border-radius:16px; cursor:pointer;">
+{{ s.replace('_', ' ').title() }}
+</button>
+{% endfor %}
+</form>
+</div>
+{% endblock %}
