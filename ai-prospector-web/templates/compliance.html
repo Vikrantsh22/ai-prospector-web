@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 style="font-size:24px; font-weight:800;">Resting Friends 🧸</h1>
+<p style="color:var(--text-sub); font-size:14px; margin-top:4px; margin-bottom:20px;">
+Contacts guarded by SQLite database triggers. Any outreach attempts to these emails are blocked by the database engine.
+</p>
+{% for s in suppressed %}
+<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+<div>
+<h3 style="color:var(--coral); font-size:15px; font-weight:800;">{{ s.email or s.domain }} 💤</h3>
+<p style="font-size:12px; color:var(--text-sub); margin-top:2px;">
+Reason: {{ s.reason }} (via {{ s.suppressed_by }})
+</p>
+</div>
+<span style="font-size:12px; color:var(--text-muted);">{{ s.suppressed_at[:10] }}</span>
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:40px;">
+<div style="font-size:36px; margin-bottom:12px;">✨🐶✨</div>
+<h2 style="font-size:16px; font-weight:800;">Registry is clean!</h2>
+<p style="font-size:13px; color:var(--text-sub); margin-top:4px;">No contacts are currently suppressed.</p>
+</div>
+{% endfor %}
+{% endblock %}
+EOF
